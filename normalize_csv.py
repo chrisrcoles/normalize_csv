@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime, timedelta
+import io
 import re
 import sys
 
@@ -46,4 +47,5 @@ def parse_duration(duration_str):
         return td.seconds + td.microseconds/1_000_000
 
 if __name__ == '__main__':
-    normalize_csv(sys.stdin, sys.stdout)
+    input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
+    normalize_csv(input_stream, sys.stdout)
