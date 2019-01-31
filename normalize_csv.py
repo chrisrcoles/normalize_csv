@@ -63,6 +63,7 @@ def parse_duration(duration_str):
 
 
 if __name__ == '__main__':
+    # Wrap stdin to fix UTF-8 encoding errors
     input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8',
                                     errors='replace')
     normalize_csv(input_stream, sys.stdout)
