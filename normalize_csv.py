@@ -29,13 +29,23 @@ def normalize_csv(src, dest):
         row["TotalDuration"] = row["FooDuration"] + row["BarDuration"]
         writer.writerow(row)
 
+
 def convert_timestamp(timestamp):
+    """
+    Convert timestamps assumed to be in US/Pacific time to to US/Eastern and
+    format to ISO-8601.
+    """
     naive_datetime = datetime.strptime(timestamp, "%m/%d/%y %I:%M:%S %p")
-    aware_datetime = PACIFIC.localize(naive_datetime)
-    converted_datetime = aware_datetime.astimezone(EASTERN)
-    return converted_datetime.isoformat()
+    pacific_datetime = PACIFIC.localize(naive_datetime)
+    eastern_datetime = pacific_datetime.astimezone(EASTERN)
+    return eastern_datetime.isoformat()
+
 
 def parse_duration(duration_str):
+    """
+    Parse durations stored in HH:MM:SS.MS format (where MS is milliseconds)
+    to a floating point seconds format.
+    """
     match = DURATION_REGEX.match(duration_str)
     if match:
         td = timedelta(
@@ -46,6 +56,8 @@ def parse_duration(duration_str):
         )
         return td.seconds + td.microseconds/1_000_000
 
+
 if __name__ == '__main__':
-    input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
+    input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8',
+                                    errors='replace')
     normalize_csv(input_stream, sys.stdout)
