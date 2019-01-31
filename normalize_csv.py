@@ -21,19 +21,21 @@ def normalize_csv(src, dest):
     writer.writeheader()
 
     for row in reader:
-        row["FullName"] = row["FullName"].upper()
-        row["Timestamp"] = convert_timestamp(row["Timestamp"])
-        row["ZIP"] = "{:05d}".format(int(row["ZIP"]))
-        row["FooDuration"] = parse_duration(row["FooDuration"])
-        row["BarDuration"] = parse_duration(row["BarDuration"])
-        row["TotalDuration"] = row["FooDuration"] + row["BarDuration"]
-        writer.writerow(row)
+        try:
+            row["FullName"] = row["FullName"].upper()
+            row["Timestamp"] = convert_timestamp(row["Timestamp"])
+            row["ZIP"] = "{:05d}".format(int(row["ZIP"]))
+            row["FooDuration"] = parse_duration(row["FooDuration"])
+            row["BarDuration"] = parse_duration(row["BarDuration"])
+            row["TotalDuration"] = row["FooDuration"] + row["BarDuration"]
+            writer.writerow(row)
+        except ValueError as e:
+            print(e, file=sys.stderr)
 
 
 def convert_timestamp(timestamp):
     """
-    Convert timestamps assumed to be in US/Pacific time to to US/Eastern and
-    format to ISO-8601.
+    Convert timestamps from US/Pacific to to US/Eastern and format to ISO-8601.
     """
     naive_datetime = datetime.strptime(timestamp, "%m/%d/%y %I:%M:%S %p")
     pacific_datetime = PACIFIC.localize(naive_datetime)
@@ -55,6 +57,9 @@ def parse_duration(duration_str):
             milliseconds=int(match.group('milliseconds'))
         )
         return td.seconds + td.microseconds/1_000_000
+    else:
+        raise ValueError(
+            "{} does not match format HH:MM:SS.MS".format(duration_str))
 
 
 if __name__ == '__main__':
